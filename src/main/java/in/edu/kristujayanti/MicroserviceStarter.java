@@ -276,7 +276,29 @@ public class MicroserviceStarter {
             throw new BootstrapException("MongoDB connection string or DB name missing from configuration server.");
         }
 
-        String connectionString = mongoConfig.getString("connection_string") + "/" + mongoConfig.getString(DB_NAME);
+        String connectionString = mongoConfig.getString("connection_string");
+        com.mongodb.ConnectionString connString = new com.mongodb.ConnectionString(connectionString);
+
+        if (connString.getDatabase() == null) {
+            String dbName = mongoConfig.getString(DB_NAME);
+            if (connectionString.contains("?")) {
+                int queryIdx = connectionString.indexOf("?");
+                String base = connectionString.substring(0, queryIdx);
+                String query = connectionString.substring(queryIdx);
+                if (base.endsWith("/")) {
+                    connectionString = base + dbName + query;
+                } else {
+                    connectionString = base + "/" + dbName + query;
+                }
+            } else {
+                if (connectionString.endsWith("/")) {
+                    connectionString = connectionString + dbName;
+                } else {
+                    connectionString = connectionString + "/" + dbName;
+                }
+            }
+        }
+
         return MongoClients.create(connectionString);
     }
 

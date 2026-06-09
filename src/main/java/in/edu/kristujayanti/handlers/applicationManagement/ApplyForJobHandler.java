@@ -1,12 +1,10 @@
-package in.edu.kristujayanti.handlers.companyManagement;
+package in.edu.kristujayanti.handlers.applicationManagement;
 
 import in.edu.kristujayanti.enums.ResponseType;
 import in.edu.kristujayanti.enums.StatusCode;
-import in.edu.kristujayanti.services.CompanyService;
-import in.edu.kristujayanti.util.DocumentParser;
+import in.edu.kristujayanti.services.ApplicationService;
 import in.edu.kristujayanti.util.ResponseUtil;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -17,37 +15,41 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class CreateCompanyHandler implements Handler<RoutingContext> {
+public class ApplyForJobHandler implements Handler<RoutingContext> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreateCompanyHandler.class);
-    private final CompanyService companyService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplyForJobHandler.class);
+    private final ApplicationService applicationService;
 
     private final List<String> REQUIRED_FIELDS = List.of(
+            "studentId",
+            "rollNo",
+            "studentName",
+            "placementId",
+            "jobId",
+            "companyId",
             "companyName",
-            "industry",
-            "contactPerson"
+            "appliedDate"
     );
 
-    // Constructor
-    public CreateCompanyHandler(CompanyService companyService) {
-        this.companyService = companyService;
+    public ApplyForJobHandler(ApplicationService applicationService) {
+        this.applicationService = applicationService;
     }
 
-    /**
-     * Handles the request to fetch application status.
-     *
-     * @param routingContext the routing context
-     */
     @Override
     public void handle(RoutingContext routingContext) {
         HttpServerResponse response = routingContext.response();
-        HttpServerRequest request = routingContext.request();
 
         try {
-
             JsonObject body = routingContext.body().asJsonObject();
-
-            Document paramsDoc = Document.parse(body.encode());
+            if (body == null) {
+                ResponseUtil.createResponse(
+                        response,
+                        ResponseType.SUCCESS,
+                        StatusCode.BAD_REQUEST,
+                        new JsonObject(),
+                        new JsonArray().add("Request body is required"));
+                return;
+            }
 
             JsonArray validationResponse = new JsonArray();
             for (String field : REQUIRED_FIELDS) {
@@ -61,26 +63,28 @@ public class CreateCompanyHandler implements Handler<RoutingContext> {
                 return;
             }
 
-           JsonObject createCompany = companyService.createCompany(paramsDoc);
-            if(!createCompany.containsKey("error")){
+            Document paramsDoc = Document.parse(body.encode());
+
+            JsonObject createResult = applicationService.applyForJob(paramsDoc);
+            if (!createResult.containsKey("error")) {
                 ResponseUtil.createResponse(
                         response,
                         ResponseType.SUCCESS,
-                        StatusCode.TWOHUNDRED,
-                        new JsonArray(),
-                        new JsonArray().add("Company Creation Successful"));
-            }else{
+                        StatusCode.CREATED,
+                        createResult,
+                        new JsonArray().add("Application submitted successfully"));
+            } else {
+                String errorMsg = createResult.getString("error");
+                StatusCode code = errorMsg.contains("already applied") ? StatusCode.CONFLICT : StatusCode.BAD_REQUEST;
                 ResponseUtil.createResponse(
                         response,
                         ResponseType.SUCCESS,
-                        StatusCode.BAD_REQUEST,
-                        createCompany,
-                        new JsonArray().add("No Companies Created"));
+                        code,
+                        createResult,
+                        new JsonArray().add(errorMsg));
             }
-
-
         } catch (Exception e) {
-            LOGGER.error("Error in List Company Handler", e);
+            LOGGER.error("Error in Apply For Job Handler", e);
             ResponseUtil.createResponse(
                     response,
                     ResponseType.ERROR,
