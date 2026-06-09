@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="PlacementsApp" type="Application" factoryName="Application"
+                   nameIsGenerated="true">
+        <envs>
+            <env name="log4j.configurationFile" value="config/log4j2.xml"/>
+        </envs>
+        <option name="MAIN_CLASS_NAME" value="in.edu.kristujayanti.MicroserviceStarter"/>
+        <module name="KJUsys-PlacementsApp"/>
+        <option name="PROGRAM_PARAMETERS" value="-config_server_address 127.0.0.1:6379 -environment development"/>
+        <option name="WORKING_DIRECTORY" value="$ContentRoot$"/>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>

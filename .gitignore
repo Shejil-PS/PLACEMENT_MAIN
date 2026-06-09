@@ -1,0 +1,50 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/*
+!.idea/runConfigurations/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+### POM ###
+dependency-reduced-pom.xml
+
+### CUSTOM ###
+*.log
+*.log.gz
+resources/
+file-uploads/
+File-Uploads/
+fileuploads/
+FileUploads/
+Uploads/
+uploads/
+setup.sh
+setup.ps1
+setup.bat
