@@ -16,22 +16,24 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import in.edu.kristujayanti.propertyBinder.placements.StudentsKeyPBinder;
+
 public class CreateStudentHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateStudentHandler.class);
     private final StudentService studentService;
 
     private final List<String> REQUIRED_FIELDS = List.of(
-            "rollNo",
-            "firstName",
-            "lastName",
-            "gender",
-            "dob",
-            "section",
-            "specialization",
-            "departmentName",
-            "personalEmail",
-            "batchCode"
+            StudentsKeyPBinder.ROLL_NO.getPropertyName(),
+            StudentsKeyPBinder.FIRST_NAME.getPropertyName(),
+            StudentsKeyPBinder.LAST_NAME.getPropertyName(),
+            StudentsKeyPBinder.GENDER.getPropertyName(),
+            StudentsKeyPBinder.DOB.getPropertyName(),
+            StudentsKeyPBinder.SECTION.getPropertyName(),
+            StudentsKeyPBinder.SPECIALIZATION.getPropertyName(),
+            StudentsKeyPBinder.DEPARTMENT_NAME.getPropertyName(),
+            StudentsKeyPBinder.EMAIL.getPropertyName(),
+            StudentsKeyPBinder.BATCH_CODE.getPropertyName()
     );
 
     public CreateStudentHandler(StudentService studentService) {
@@ -55,12 +57,7 @@ public class CreateStudentHandler implements Handler<RoutingContext> {
             }
 
             Document paramsDoc = Document.parse(body.encode());
-            JsonArray validationResponse = new JsonArray();
-            for (String field : REQUIRED_FIELDS) {
-                if (!body.containsKey(field) || body.getValue(field) == null || body.getValue(field).toString().trim().isEmpty()) {
-                    validationResponse.add(field + " is required");
-                }
-            }
+            JsonArray validationResponse = DocumentParser.validateAndCleanDocument(paramsDoc, REQUIRED_FIELDS);
 
             if (!validationResponse.isEmpty()) {
                 ResponseUtil.createResponse(response, ResponseType.VALIDATION, StatusCode.BAD_REQUEST, validationResponse, new JsonArray());

@@ -90,30 +90,30 @@ public class PlacementService extends MongoDataAccess {
                     long counter = response.toLong();
                     String generatedId = String.format("P%03d", counter);
                     paramsDoc.put("_id", generatedId);
-                    if (!paramsDoc.containsKey("placementCode") || paramsDoc.getString("placementCode") == null || paramsDoc.getString("placementCode").trim().isEmpty()) {
-                        paramsDoc.put("placementCode", generatedId);
+                    if (!paramsDoc.containsKey("placementCode_PlacementDrive_Text") || paramsDoc.getString("placementCode_PlacementDrive_Text") == null || paramsDoc.getString("placementCode_PlacementDrive_Text").trim().isEmpty()) {
+                        paramsDoc.put("placementCode_PlacementDrive_Text", generatedId);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to generate placement ID from Redis: " + e.getMessage());
                 }
             } else {
-                if (!paramsDoc.containsKey("placementCode") || paramsDoc.getString("placementCode") == null || paramsDoc.getString("placementCode").trim().isEmpty()) {
-                    paramsDoc.put("placementCode", paramsDoc.getString("_id"));
+                if (!paramsDoc.containsKey("placementCode_PlacementDrive_Text") || paramsDoc.getString("placementCode_PlacementDrive_Text") == null || paramsDoc.getString("placementCode_PlacementDrive_Text").trim().isEmpty()) {
+                    paramsDoc.put("placementCode_PlacementDrive_Text", paramsDoc.getString("_id"));
                 }
             }
 
             // Generate IDs for any nested jobs/fields
-            if (paramsDoc.containsKey("jobs")) {
-                List<Document> jobs = paramsDoc.getList("jobs", Document.class);
+            if (paramsDoc.containsKey("jobs_PlacementDrive_DocumentArray")) {
+                List<Document> jobs = paramsDoc.getList("jobs_PlacementDrive_DocumentArray", Document.class);
                 for (Document job : jobs) {
-                    if (!job.containsKey("jobId") || job.getString("jobId") == null || job.getString("jobId").trim().isEmpty()) {
-                        job.put("jobId", "J-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                    if (!job.containsKey("jobId_PlacementDrive_Text") || job.getString("jobId_PlacementDrive_Text") == null || job.getString("jobId_PlacementDrive_Text").trim().isEmpty()) {
+                        job.put("jobId_PlacementDrive_Text", "J-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
                     }
-                    if (job.containsKey("fields")) {
-                        List<Document> fields = job.getList("fields", Document.class);
+                    if (job.containsKey("fields_PlacementDrive_DocumentArray")) {
+                        List<Document> fields = job.getList("fields_PlacementDrive_DocumentArray", Document.class);
                         for (Document field : fields) {
-                            if (!field.containsKey("fieldId") || field.getString("fieldId") == null || field.getString("fieldId").trim().isEmpty()) {
-                                field.put("fieldId", "F-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                            if (!field.containsKey("fieldId_PlacementDrive_Text") || field.getString("fieldId_PlacementDrive_Text") == null || field.getString("fieldId_PlacementDrive_Text").trim().isEmpty()) {
+                                field.put("fieldId_PlacementDrive_Text", "F-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
                             }
                         }
                     }
@@ -191,12 +191,12 @@ public class PlacementService extends MongoDataAccess {
     // ── Job operations ─────────────────────────────────────────────────────────
 
     public Document addJob(String placementId, Document jobDoc) {
-        if (!jobDoc.containsKey("jobId") || jobDoc.getString("jobId") == null || jobDoc.getString("jobId").trim().isEmpty()) {
-            jobDoc.put("jobId", "J-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        if (!jobDoc.containsKey("jobId_PlacementDrive_Text") || jobDoc.getString("jobId_PlacementDrive_Text") == null || jobDoc.getString("jobId_PlacementDrive_Text").trim().isEmpty()) {
+            jobDoc.put("jobId_PlacementDrive_Text", "J-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
 
         Bson filter = buildQuery(placementId);
-        Bson update = Updates.push("jobs", jobDoc);
+        Bson update = Updates.push("jobs_PlacementDrive_DocumentArray", jobDoc);
 
         try (ClientSession clientSession = getMongoDbSession(mongoClient)) {
             startTransaction(clientSession);
@@ -214,12 +214,12 @@ public class PlacementService extends MongoDataAccess {
     }
 
     public Document updateJob(String placementId, String jobId, Document fieldsToUpdate) {
-        Bson filter = Filters.and(buildQuery(placementId), Filters.eq("jobs.jobId", jobId));
+        Bson filter = Filters.and(buildQuery(placementId), Filters.eq("jobs_PlacementDrive_DocumentArray.jobId_PlacementDrive_Text", jobId));
 
         List<Bson> updates = new ArrayList<>();
         for (String key : fieldsToUpdate.keySet()) {
-            if (!key.equals("jobId")) {
-                updates.add(Updates.set("jobs.$." + key, fieldsToUpdate.get(key)));
+            if (!key.equals("jobId_PlacementDrive_Text")) {
+                updates.add(Updates.set("jobs_PlacementDrive_DocumentArray.$." + key, fieldsToUpdate.get(key)));
             }
         }
 
@@ -244,7 +244,7 @@ public class PlacementService extends MongoDataAccess {
 
     public Document deleteJob(String placementId, String jobId) {
         Bson filter = buildQuery(placementId);
-        Bson update = Updates.pull("jobs", new Document("jobId", jobId));
+        Bson update = Updates.pull("jobs_PlacementDrive_DocumentArray", new Document("jobId_PlacementDrive_Text", jobId));
 
         try (ClientSession clientSession = getMongoDbSession(mongoClient)) {
             startTransaction(clientSession);
@@ -264,12 +264,12 @@ public class PlacementService extends MongoDataAccess {
     // ── Job Field operations ───────────────────────────────────────────────────
 
     public Document addJobField(String placementId, String jobId, Document fieldDoc) {
-        if (!fieldDoc.containsKey("fieldId") || fieldDoc.getString("fieldId") == null || fieldDoc.getString("fieldId").trim().isEmpty()) {
-            fieldDoc.put("fieldId", "F-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        if (!fieldDoc.containsKey("fieldId_PlacementDrive_Text") || fieldDoc.getString("fieldId_PlacementDrive_Text") == null || fieldDoc.getString("fieldId_PlacementDrive_Text").trim().isEmpty()) {
+            fieldDoc.put("fieldId_PlacementDrive_Text", "F-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
 
-        Bson filter = Filters.and(buildQuery(placementId), Filters.eq("jobs.jobId", jobId));
-        Bson update = Updates.push("jobs.$.fields", fieldDoc);
+        Bson filter = Filters.and(buildQuery(placementId), Filters.eq("jobs_PlacementDrive_DocumentArray.jobId_PlacementDrive_Text", jobId));
+        Bson update = Updates.push("jobs_PlacementDrive_DocumentArray.$.fields_PlacementDrive_DocumentArray", fieldDoc);
 
         try (ClientSession clientSession = getMongoDbSession(mongoClient)) {
             startTransaction(clientSession);
@@ -292,8 +292,8 @@ public class PlacementService extends MongoDataAccess {
         
         List<Bson> setUpdates = new ArrayList<>();
         for (String key : fieldUpdates.keySet()) {
-            if (!key.equals("fieldId")) {
-                setUpdates.add(Updates.set("jobs.$[job].fields.$[field]." + key, fieldUpdates.get(key)));
+            if (!key.equals("fieldId_PlacementDrive_Text")) {
+                setUpdates.add(Updates.set("jobs_PlacementDrive_DocumentArray.$[job].fields_PlacementDrive_DocumentArray.$[field]." + key, fieldUpdates.get(key)));
             }
         }
         
@@ -302,8 +302,8 @@ public class PlacementService extends MongoDataAccess {
         Bson update = Updates.combine(setUpdates);
         
         List<Bson> arrayFilters = new ArrayList<>();
-        arrayFilters.add(Filters.eq("job.jobId", jobId));
-        arrayFilters.add(Filters.eq("field.fieldId", fieldId));
+        arrayFilters.add(Filters.eq("job.jobId_PlacementDrive_Text", jobId));
+        arrayFilters.add(Filters.eq("field.fieldId_PlacementDrive_Text", fieldId));
 
         try (ClientSession clientSession = getMongoDbSession(mongoClient)) {
             startTransaction(clientSession);
@@ -323,8 +323,8 @@ public class PlacementService extends MongoDataAccess {
     }
 
     public Document deleteJobField(String placementId, String jobId, String fieldId) {
-        Bson filter = Filters.and(buildQuery(placementId), Filters.eq("jobs.jobId", jobId));
-        Bson update = Updates.pull("jobs.$.fields", new Document("fieldId", fieldId));
+        Bson filter = Filters.and(buildQuery(placementId), Filters.eq("jobs_PlacementDrive_DocumentArray.jobId_PlacementDrive_Text", jobId));
+        Bson update = Updates.pull("jobs_PlacementDrive_DocumentArray.$.fields_PlacementDrive_DocumentArray", new Document("fieldId_PlacementDrive_Text", fieldId));
 
         try (ClientSession clientSession = getMongoDbSession(mongoClient)) {
             startTransaction(clientSession);

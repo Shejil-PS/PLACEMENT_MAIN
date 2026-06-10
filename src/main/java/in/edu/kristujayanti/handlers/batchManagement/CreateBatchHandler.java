@@ -15,15 +15,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import in.edu.kristujayanti.propertyBinder.placements.BatchesKeyPBinder;
+import in.edu.kristujayanti.util.DocumentParser;
+
 public class CreateBatchHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBatchHandler.class);
     private final BatchService batchService;
 
     private final List<String> REQUIRED_FIELDS = List.of(
-            "batchCode",
-            "batchName",
-            "department"
+            BatchesKeyPBinder.BATCH_CODE.getPropertyName(),
+            BatchesKeyPBinder.BATCH_NAME.getPropertyName(),
+            BatchesKeyPBinder.DEPARTMENT_NAME.getPropertyName()
     );
 
     public CreateBatchHandler(BatchService batchService) {
@@ -46,30 +49,13 @@ public class CreateBatchHandler implements Handler<RoutingContext> {
                 return;
             }
 
-            String batchId = body.getString("batchId");
-            if (batchId == null) {
-                batchId = body.getString("_id ");
-            }
-
-            JsonArray validationResponse = new JsonArray();
-            for (String field : REQUIRED_FIELDS) {
-                if (!body.containsKey(field) || body.getValue(field) == null || body.getValue(field).toString().trim().isEmpty()) {
-                    validationResponse.add(field + " is required");
-                }
-            }
+            Document paramsDoc = Document.parse(body.encode());
+            JsonArray validationResponse = DocumentParser.validateAndCleanDocument(paramsDoc, REQUIRED_FIELDS);
 
             if (!validationResponse.isEmpty()) {
                 ResponseUtil.createResponse(response, ResponseType.VALIDATION, StatusCode.BAD_REQUEST, validationResponse, new JsonArray());
                 return;
             }
-
-            Document paramsDoc = new Document();
-            if (batchId != null && !batchId.trim().isEmpty()) {
-                paramsDoc.put("_id ", batchId);
-            }
-            paramsDoc.put("batchCode", body.getString("batchCode"));
-            paramsDoc.put("batchName", body.getString("batchName"));
-            paramsDoc.put("department", body.getString("department"));
 
             JsonObject createResult = batchService.createBatch(paramsDoc);
             if (!createResult.containsKey("error")) {

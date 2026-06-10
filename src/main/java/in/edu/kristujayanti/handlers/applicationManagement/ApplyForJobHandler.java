@@ -15,20 +15,23 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import in.edu.kristujayanti.propertyBinder.placements.AppilcationsKeyPBinder;
+import in.edu.kristujayanti.util.DocumentParser;
+
 public class ApplyForJobHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplyForJobHandler.class);
     private final ApplicationService applicationService;
 
     private final List<String> REQUIRED_FIELDS = List.of(
-            "studentId",
-            "rollNo",
-            "studentName",
-            "placementId",
-            "jobId",
-            "companyId",
-            "companyName",
-            "appliedDate"
+            AppilcationsKeyPBinder.STUDENT_ID.getPropertyName(),
+            AppilcationsKeyPBinder.ROLL_NO.getPropertyName(),
+            AppilcationsKeyPBinder.STUDENT_NAME.getPropertyName(),
+            AppilcationsKeyPBinder.PLACEMENT_ID.getPropertyName(),
+            AppilcationsKeyPBinder.JOB_ID.getPropertyName(),
+            AppilcationsKeyPBinder.COMPANY_CODE.getPropertyName(),
+            AppilcationsKeyPBinder.COMPANY_NAME.getPropertyName(),
+            AppilcationsKeyPBinder.APPILIED_DATE.getPropertyName()
     );
 
     public ApplyForJobHandler(ApplicationService applicationService) {
@@ -51,19 +54,14 @@ public class ApplyForJobHandler implements Handler<RoutingContext> {
                 return;
             }
 
-            JsonArray validationResponse = new JsonArray();
-            for (String field : REQUIRED_FIELDS) {
-                if (!body.containsKey(field) || body.getValue(field) == null || body.getValue(field).toString().trim().isEmpty()) {
-                    validationResponse.add(field + " is required");
-                }
-            }
+            Document paramsDoc = Document.parse(body.encode());
+            JsonArray validationResponse = DocumentParser.validateAndCleanDocument(paramsDoc, REQUIRED_FIELDS);
 
             if (!validationResponse.isEmpty()) {
                 ResponseUtil.createResponse(response, ResponseType.VALIDATION, StatusCode.BAD_REQUEST, validationResponse, new JsonArray());
                 return;
             }
 
-            Document paramsDoc = Document.parse(body.encode());
 
             JsonObject createResult = applicationService.applyForJob(paramsDoc);
             if (!createResult.containsKey("error")) {

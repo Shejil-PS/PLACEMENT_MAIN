@@ -15,17 +15,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import in.edu.kristujayanti.propertyBinder.placements.PlacementsKeyPBinder;
+import in.edu.kristujayanti.util.DocumentParser;
+
 public class CreatePlacementHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreatePlacementHandler.class);
     private final PlacementService placementService;
 
     private final List<String> REQUIRED_FIELDS = List.of(
-            "companyId",
-            "companyName",
-            "batchCode",
-            "driveStart",
-            "driveEnd"
+            PlacementsKeyPBinder.COMPANY_CODE.getPropertyName(),
+            PlacementsKeyPBinder.COMPANY_NAME.getPropertyName(),
+            PlacementsKeyPBinder.BATCH_CODE.getPropertyName(),
+            PlacementsKeyPBinder.DRIVE_START.getPropertyName(),
+            PlacementsKeyPBinder.DRIVE_END.getPropertyName()
     );
 
     public CreatePlacementHandler(PlacementService placementService) {
@@ -48,23 +51,12 @@ public class CreatePlacementHandler implements Handler<RoutingContext> {
                 return;
             }
 
-            JsonArray validationResponse = new JsonArray();
-            for (String field : REQUIRED_FIELDS) {
-                if (!body.containsKey(field) || body.getValue(field) == null || body.getValue(field).toString().trim().isEmpty()) {
-                    validationResponse.add(field + " is required");
-                }
-            }
+            Document paramsDoc = Document.parse(body.encode());
+            JsonArray validationResponse = DocumentParser.validateAndCleanDocument(paramsDoc, REQUIRED_FIELDS);
 
             if (!validationResponse.isEmpty()) {
                 ResponseUtil.createResponse(response, ResponseType.VALIDATION, StatusCode.BAD_REQUEST, validationResponse, new JsonArray());
                 return;
-            }
-
-            Document paramsDoc = Document.parse(body.encode());
-            // If the user provided placementId alias, map it
-            if (body.containsKey("placementId")) {
-                paramsDoc.put("_id", body.getString("placementId"));
-                paramsDoc.remove("placementId");
             }
 
             JsonObject createResult = placementService.createPlacement(paramsDoc);

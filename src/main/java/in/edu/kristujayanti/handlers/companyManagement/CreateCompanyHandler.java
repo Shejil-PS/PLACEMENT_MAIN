@@ -2,6 +2,7 @@ package in.edu.kristujayanti.handlers.companyManagement;
 
 import in.edu.kristujayanti.enums.ResponseType;
 import in.edu.kristujayanti.enums.StatusCode;
+import in.edu.kristujayanti.propertyBinder.placements.CompanyKeyPBinder;
 import in.edu.kristujayanti.services.CompanyService;
 import in.edu.kristujayanti.util.DocumentParser;
 import in.edu.kristujayanti.util.ResponseUtil;
@@ -23,10 +24,9 @@ public class CreateCompanyHandler implements Handler<RoutingContext> {
     private final CompanyService companyService;
 
     private final List<String> REQUIRED_FIELDS = List.of(
-            "companyName",
-            "industry",
-            "contactPerson"
-    );
+            CompanyKeyPBinder.COMPANY_NAME.getPropertyName(),
+            CompanyKeyPBinder.INDUSTRY.getPropertyName(),
+            CompanyKeyPBinder.CONTACT_PERSON.getPropertyName());
 
     // Constructor
     public CreateCompanyHandler(CompanyService companyService) {
@@ -49,27 +49,23 @@ public class CreateCompanyHandler implements Handler<RoutingContext> {
 
             Document paramsDoc = Document.parse(body.encode());
 
-            JsonArray validationResponse = new JsonArray();
-            for (String field : REQUIRED_FIELDS) {
-                if (!body.containsKey(field) || body.getValue(field) == null || body.getValue(field).toString().trim().isEmpty()) {
-                    validationResponse.add(field + " is required");
-                }
-            }
+            JsonArray validationResponse = DocumentParser.validateAndCleanDocument(paramsDoc, REQUIRED_FIELDS);
 
             if (!validationResponse.isEmpty()) {
-                ResponseUtil.createResponse(response, ResponseType.VALIDATION, StatusCode.BAD_REQUEST, validationResponse, new JsonArray());
+                ResponseUtil.createResponse(response, ResponseType.VALIDATION, StatusCode.BAD_REQUEST,
+                        validationResponse, new JsonArray());
                 return;
             }
 
-           JsonObject createCompany = companyService.createCompany(paramsDoc);
-            if(!createCompany.containsKey("error")){
+            JsonObject createCompany = companyService.createCompany(paramsDoc);
+            if (!createCompany.containsKey("error")) {
                 ResponseUtil.createResponse(
                         response,
                         ResponseType.SUCCESS,
                         StatusCode.TWOHUNDRED,
                         new JsonArray(),
                         new JsonArray().add("Company Creation Successful"));
-            }else{
+            } else {
                 ResponseUtil.createResponse(
                         response,
                         ResponseType.SUCCESS,
@@ -77,7 +73,6 @@ public class CreateCompanyHandler implements Handler<RoutingContext> {
                         createCompany,
                         new JsonArray().add("No Companies Created"));
             }
-
 
         } catch (Exception e) {
             LOGGER.error("Error in List Company Handler", e);
