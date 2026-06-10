@@ -30,10 +30,28 @@ public interface MicroserviceRoutingURLNames {
     String UPDATE_BATCH = "/update-batch/:id";
     String DELETE_BATCH = "/delete-batch/:id";
 
-    String APPLY_FOR_JOB = "/applications";
-    String LIST_APPLICATIONS = "/applications";
+    String APPLY_FOR_JOB = "/create-applications";
+    String LIST_APPLICATIONS = "/list-applications";
     String EXPORT_APPLICATIONS = "/applications/export";
     String GET_APPLICATION_BY_ID = "/applications/:applicationId";
     String UPDATE_APPLICATION_STATUS = "/applications/:applicationId/status";
+
+    String LIST_PLACEMENTS = "/placements";
+    String CREATE_PLACEMENT = "/create-placements";
+    String GET_PLACEMENT_BY_ID = "/placements/:placementId";
+    String UPDATE_PLACEMENT = "/update-placements/:placementId";
+    String DELETE_PLACEMENT = "/delete-placements/:placementId";
+
+    String ADD_JOB = "/placements/:placementId/jobs";
+    String UPDATE_JOB = "/placements/:placementId/jobs/:jobId";
+    String DELETE_JOB = "/placements/:placementId/jobs/:jobId";
+
+    String ADD_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields";
+    String UPDATE_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields/:fieldId";
+    String DELETE_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields/:fieldId";
+
+    String GET_DASHBOARD_SUMMARY = "/dashboard/summary";
+    String GET_DASHBOARD_PLACEMENT_STATS = "/dashboard/placement-stats";
+    String GET_DASHBOARD_RECENT_ACTIVITY = "/dashboard/recent-applications";
 
 }

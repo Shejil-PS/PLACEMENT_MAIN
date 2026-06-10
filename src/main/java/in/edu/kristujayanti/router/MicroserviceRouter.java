@@ -29,6 +29,10 @@ import in.edu.kristujayanti.services.CompanyService;
 import in.edu.kristujayanti.services.StudentService;
 import in.edu.kristujayanti.services.BatchService;
 import in.edu.kristujayanti.services.ApplicationService;
+import in.edu.kristujayanti.services.PlacementService;
+import in.edu.kristujayanti.handlers.placementManagement.*;
+import in.edu.kristujayanti.services.DashboardService;
+import in.edu.kristujayanti.handlers.dashboard.*;
 import in.edu.kristujayanti.services.HealthService;
 import in.edu.kristujayanti.handlers.HealthHandler;
 import io.vertx.core.Handler;
@@ -150,6 +154,29 @@ public class MicroserviceRouter extends RouterBase {
                 addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_APPLICATION_BY_ID, new GetApplicationByIdHandler(applicationService));
 
                 addRoute(HttpMethod.PATCH, MicroserviceRoutingURLNames.UPDATE_APPLICATION_STATUS, new UpdateApplicationStatusHandler(applicationService));
+
+                // Placement Management
+                PlacementService placementService = new PlacementService(mongoDatabase, mongoClient, redisCommandConnection);
+
+                addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.LIST_PLACEMENTS, new GetPlacementsHandler(placementService));
+                addRoute(HttpMethod.POST, MicroserviceRoutingURLNames.CREATE_PLACEMENT, new CreatePlacementHandler(placementService));
+                addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_PLACEMENT_BY_ID, new GetPlacementByIdHandler(placementService));
+                addRoute(HttpMethod.PUT, MicroserviceRoutingURLNames.UPDATE_PLACEMENT, new UpdatePlacementHandler(placementService));
+                addRoute(HttpMethod.DELETE, MicroserviceRoutingURLNames.DELETE_PLACEMENT, new DeletePlacementHandler(placementService));
+
+                addRoute(HttpMethod.POST, MicroserviceRoutingURLNames.ADD_JOB, new AddJobHandler(placementService));
+                addRoute(HttpMethod.PUT, MicroserviceRoutingURLNames.UPDATE_JOB, new UpdateJobHandler(placementService));
+                addRoute(HttpMethod.DELETE, MicroserviceRoutingURLNames.DELETE_JOB, new DeleteJobHandler(placementService));
+
+                addRoute(HttpMethod.POST, MicroserviceRoutingURLNames.ADD_JOB_FIELD, new AddJobFieldHandler(placementService));
+                addRoute(HttpMethod.PUT, MicroserviceRoutingURLNames.UPDATE_JOB_FIELD, new UpdateJobFieldHandler(placementService));
+                addRoute(HttpMethod.DELETE, MicroserviceRoutingURLNames.DELETE_JOB_FIELD, new DeleteJobFieldHandler(placementService));
+
+                // Dashboard Management
+                DashboardService dashboardService = new DashboardService(mongoDatabase);
+                addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_DASHBOARD_SUMMARY, new GetSummaryHandler(dashboardService));
+                addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_DASHBOARD_PLACEMENT_STATS, new GetPlacementStatsHandler(dashboardService));
+                addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_DASHBOARD_RECENT_ACTIVITY, new GetRecentActivityHandler(dashboardService));
 
         }
 
