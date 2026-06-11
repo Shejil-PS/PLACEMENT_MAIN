@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import in.edu.kristujayanti.propertyBinder.placements.PlacementsKeyPBinder;
 
 public class AddJobFieldHandler implements Handler<RoutingContext> {
 
@@ -21,8 +22,8 @@ public class AddJobFieldHandler implements Handler<RoutingContext> {
     private final PlacementService placementService;
 
     private final List<String> REQUIRED_FIELDS = List.of(
-            "label",
-            "fieldType"
+            PlacementsKeyPBinder.LABEL.getPropertyName(),
+            PlacementsKeyPBinder.FIELD_TYPE.getPropertyName()
     );
 
     public AddJobFieldHandler(PlacementService placementService) {

@@ -105,15 +105,32 @@ public class PlacementService extends MongoDataAccess {
             // Generate IDs for any nested jobs/fields
             if (paramsDoc.containsKey("jobs_PlacementDrive_DocumentArray")) {
                 List<Document> jobs = paramsDoc.getList("jobs_PlacementDrive_DocumentArray", Document.class);
+                RedisAPI redisAPI = RedisAPI.api(redisClient);
                 for (Document job : jobs) {
                     if (!job.containsKey("jobId_PlacementDrive_Text") || job.getString("jobId_PlacementDrive_Text") == null || job.getString("jobId_PlacementDrive_Text").trim().isEmpty()) {
-                        job.put("jobId_PlacementDrive_Text", "J-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                        try {
+                            Response response = redisAPI.incr("job:jobId:counter")
+                                    .toCompletionStage()
+                                    .toCompletableFuture()
+                                    .get(5, java.util.concurrent.TimeUnit.SECONDS);
+                            job.put("jobId_PlacementDrive_Text", String.format("J%03d", response.toLong()));
+                        } catch (Exception e) {
+                            job.put("jobId_PlacementDrive_Text", "J-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                        }
                     }
                     if (job.containsKey("fields_PlacementDrive_DocumentArray")) {
                         List<Document> fields = job.getList("fields_PlacementDrive_DocumentArray", Document.class);
                         for (Document field : fields) {
                             if (!field.containsKey("fieldId_PlacementDrive_Text") || field.getString("fieldId_PlacementDrive_Text") == null || field.getString("fieldId_PlacementDrive_Text").trim().isEmpty()) {
-                                field.put("fieldId_PlacementDrive_Text", "F-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                                try {
+                                    Response response = redisAPI.incr("field:fieldId:counter")
+                                            .toCompletionStage()
+                                            .toCompletableFuture()
+                                            .get(5, java.util.concurrent.TimeUnit.SECONDS);
+                                    field.put("fieldId_PlacementDrive_Text", String.format("F%03d", response.toLong()));
+                                } catch (Exception e) {
+                                    field.put("fieldId_PlacementDrive_Text", "F-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                                }
                             }
                         }
                     }

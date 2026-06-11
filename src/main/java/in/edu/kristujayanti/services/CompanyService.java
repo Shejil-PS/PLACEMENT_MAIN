@@ -29,7 +29,7 @@ public class CompanyService extends MongoDataAccess {
 
     public List<Document> getAllCompanies(){
 
-        List<Document> allCompaniesList = findDocuments(mongoDatabase, "companies").projection(Projections.fields(Projections.excludeId())).into(new ArrayList<>());
+        List<Document> allCompaniesList = findDocuments(mongoDatabase, "companies").into(new ArrayList<>());
 
         for(Document companyDoc : allCompaniesList){
             ResponseUtil.processResponseDocumentWithoutZone(companyDoc);

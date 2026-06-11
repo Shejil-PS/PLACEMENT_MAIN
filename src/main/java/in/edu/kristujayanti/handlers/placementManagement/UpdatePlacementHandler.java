@@ -12,6 +12,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import in.edu.kristujayanti.util.DocumentParser;
 
 public class UpdatePlacementHandler implements Handler<RoutingContext> {
 
@@ -50,6 +51,16 @@ public class UpdatePlacementHandler implements Handler<RoutingContext> {
             }
 
             Document updateDoc = Document.parse(body.encode());
+            JsonArray validationResponse = DocumentParser.validateAndCleanDocument(updateDoc, new java.util.ArrayList<>());
+            if (!validationResponse.isEmpty()) {
+                ResponseUtil.createResponse(
+                        response,
+                        ResponseType.VALIDATION,
+                        StatusCode.BAD_REQUEST,
+                        validationResponse,
+                        new JsonArray());
+                return;
+            }
             Document updatedPlacement = placementService.updatePlacement(placementId, updateDoc);
 
             if (updatedPlacement != null) {

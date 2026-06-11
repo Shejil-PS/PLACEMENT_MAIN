@@ -13,45 +13,45 @@ public interface MicroserviceRoutingURLNames {
     String HEALTH_URL = "/health";
 
     String LIST_COMPANIES= "/list-comnpanies";
-    String CREATE_COMPANY = "/create-company";
-    String GET_COMPANY_BY_ID = "/get-company/:id";
-    String UPDATE_COMPANY = "/update-company/:id";
-    String DELETE_COMPANY = "/delete-company/:id";
+String CREATE_COMPANY = "/create-company";
+String GET_COMPANY_BY_ID = "/get-company/:id";
+String UPDATE_COMPANY = "/update-company/:id";
+String DELETE_COMPANY = "/delete-company/:id";
 
-    String CREATE_STUDENT = "/create-student";
-    String LIST_STUDENTS = "/list-students";
-    String GET_STUDENT_BY_ID = "/get-student/:id";
-    String UPDATE_STUDENT = "/update-student/:id";
-    String DELETE_STUDENT = "/delete-student/:id";
+String CREATE_STUDENT = "/create-student";
+String LIST_STUDENTS = "/list-students";
+String GET_STUDENT_BY_ID = "/get-student/:id";
+String UPDATE_STUDENT = "/update-student/:id";
+String DELETE_STUDENT = "/delete-student/:id";
 
-    String CREATE_BATCH = "/create-batch";
-    String LIST_BATCHES = "/list-batches";
-    String GET_BATCH_BY_ID = "/get-batch/:id";
-    String UPDATE_BATCH = "/update-batch/:id";
-    String DELETE_BATCH = "/delete-batch/:id";
+String CREATE_BATCH = "/create-batch";
+String LIST_BATCHES = "/list-batches";
+String GET_BATCH_BY_ID = "/get-batch/:id";
+String UPDATE_BATCH = "/update-batch/:id";
+String DELETE_BATCH = "/delete-batch/:id";
 
-    String APPLY_FOR_JOB = "/create-applications";
-    String LIST_APPLICATIONS = "/list-applications";
-    String EXPORT_APPLICATIONS = "/applications/export";
-    String GET_APPLICATION_BY_ID = "/applications/:applicationId";
-    String UPDATE_APPLICATION_STATUS = "/applications/:applicationId/status";
+String APPLY_FOR_JOB = "/create-applications";
+String LIST_APPLICATIONS = "/list-applications";
+String EXPORT_APPLICATIONS = "/applications/export";
+String GET_APPLICATION_BY_ID = "/applications/:applicationId";
+String UPDATE_APPLICATION_STATUS = "/applications/:applicationId/status";
 
-    String LIST_PLACEMENTS = "/placements";
-    String CREATE_PLACEMENT = "/create-placements";
-    String GET_PLACEMENT_BY_ID = "/placements/:placementId";
-    String UPDATE_PLACEMENT = "/update-placements/:placementId";
-    String DELETE_PLACEMENT = "/delete-placements/:placementId";
+String LIST_PLACEMENTS = "/placements";
+String CREATE_PLACEMENT = "/create-placements";
+String GET_PLACEMENT_BY_ID = "/placements/:placementId";
+String UPDATE_PLACEMENT = "/update-placements/:placementId";
+String DELETE_PLACEMENT = "/delete-placements/:placementId";
 
-    String ADD_JOB = "/placements/:placementId/jobs";
-    String UPDATE_JOB = "/placements/:placementId/jobs/:jobId";
-    String DELETE_JOB = "/placements/:placementId/jobs/:jobId";
+String ADD_JOB = "/placements/:placementId/jobs";
+String UPDATE_JOB = "/placements/:placementId/jobs/:jobId";
+String DELETE_JOB = "/placements/:placementId/jobs/:jobId";
 
-    String ADD_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields";
-    String UPDATE_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields/:fieldId";
-    String DELETE_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields/:fieldId";
+String ADD_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields";
+String UPDATE_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields/:fieldId";
+String DELETE_JOB_FIELD = "/placements/:placementId/jobs/:jobId/fields/:fieldId";
 
-    String GET_DASHBOARD_SUMMARY = "/dashboard/summary";
-    String GET_DASHBOARD_PLACEMENT_STATS = "/dashboard/placement-stats";
-    String GET_DASHBOARD_RECENT_ACTIVITY = "/dashboard/recent-applications";
+String GET_DASHBOARD_SUMMARY = "/dashboard/summary";
+String GET_DASHBOARD_PLACEMENT_STATS = "/dashboard/placement-stats";
+String GET_DASHBOARD_RECENT_ACTIVITY = "/dashboard/recent-applications";
 
 }
