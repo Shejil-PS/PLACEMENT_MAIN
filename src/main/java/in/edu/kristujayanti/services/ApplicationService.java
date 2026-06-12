@@ -59,7 +59,9 @@ public class ApplicationService extends MongoDataAccess {
                             .toCompletableFuture()
                             .get(5, java.util.concurrent.TimeUnit.SECONDS);
                     long counter = response.toLong();
-                    paramsDoc.put("applicationId", String.format("A%03d", counter));
+                    String newAppId = String.format("A%03d", counter);
+                    paramsDoc.put("applicationId", newAppId);
+                    paramsDoc.put("applicationId_PlacementAppilcation_Text", newAppId);
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to generate applicationId from Redis: " + e.getMessage());
                 }
@@ -67,6 +69,7 @@ public class ApplicationService extends MongoDataAccess {
 
             if (!paramsDoc.containsKey("status") || paramsDoc.getString("status") == null || paramsDoc.getString("status").trim().isEmpty()) {
                 paramsDoc.put("status", "Applied");
+                paramsDoc.put("status_PlacementAppilcation_Text", "Applied");
             }
 
             startTransaction(clientSession);
@@ -183,12 +186,26 @@ public class ApplicationService extends MongoDataAccess {
     }
 
     public Document updateStatus(String applicationId, String newStatus) {
-        if (!VALID_STATUSES.contains(newStatus)) {
+        String finalStatus = newStatus;
+        for (String valid : VALID_STATUSES) {
+            if (valid.equalsIgnoreCase(newStatus)) {
+                finalStatus = valid;
+                break;
+            }
+        }
+        if (!VALID_STATUSES.contains(finalStatus)) {
             throw new IllegalArgumentException("Invalid status '" + newStatus + "'. Allowed: " + VALID_STATUSES);
         }
 
-        Bson filter = Filters.eq("applicationId", applicationId);
-        Document updateObj = new Document("$set", new Document("status", newStatus));
+        Bson filter;
+        if (ObjectId.isValid(applicationId)) {
+            filter = Filters.or(Filters.eq("applicationId", applicationId), Filters.eq("_id", new ObjectId(applicationId)));
+        } else {
+            filter = Filters.eq("applicationId", applicationId);
+        }
+
+        Document updateObj = new Document("$set", new Document("status", finalStatus)
+                .append("status_PlacementAppilcation_Text", finalStatus));
 
         try (ClientSession clientSession = getMongoDbSession(mongoClient)) {
             startTransaction(clientSession);
