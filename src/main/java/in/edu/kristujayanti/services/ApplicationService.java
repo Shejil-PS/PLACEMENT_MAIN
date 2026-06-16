@@ -214,6 +214,30 @@ public class ApplicationService extends MongoDataAccess {
 
             Document updatedDoc = mongoDatabase.getCollection(COLLECTION).findOneAndUpdate(clientSession, filter, updateObj, options);
             if (updatedDoc != null) {
+                if ("Selected".equalsIgnoreCase(finalStatus)) {
+                    String studentId = updatedDoc.getString("studentId");
+                    if (studentId == null) {
+                        studentId = updatedDoc.getString("studentId_PlacementAppilcation_Text");
+                    }
+                    if (studentId != null) {
+                        String company = updatedDoc.getString("companyName");
+                        if (company == null) company = updatedDoc.getString("companyName_PlacementAppilcation_Text");
+                        String role = updatedDoc.getString("jobId"); // or jobTitle
+                        
+                        Document studentSet = new Document("freeze", true)
+                                .append("freeze_PlacementStudent_Bool", true)
+                                .append("placedStatus_PlacementStudent_Bool", true);
+                        if (company != null) studentSet.append("placedCompany_PlacementStudent_Text", company);
+                        
+                        Bson studentFilter;
+                        if (ObjectId.isValid(studentId)) {
+                            studentFilter = Filters.or(Filters.eq("_id", new ObjectId(studentId)), Filters.eq("_id", studentId), Filters.eq("rollNo_PlacementStudent_Text", studentId));
+                        } else {
+                            studentFilter = Filters.or(Filters.eq("_id", studentId), Filters.eq("rollNo_PlacementStudent_Text", studentId));
+                        }
+                        mongoDatabase.getCollection("students").updateOne(clientSession, studentFilter, new Document("$set", studentSet));
+                    }
+                }
                 commitTransaction(clientSession);
                 Object originalId = updatedDoc.get("_id");
                 if (originalId instanceof String) {
@@ -268,6 +292,15 @@ public class ApplicationService extends MongoDataAccess {
                             filterList.add(Filters.eq(key, val));
                         }
                     });
+            String search = filters.getString("search");
+            if (search != null && !search.trim().isEmpty()) {
+                java.util.regex.Pattern regex = java.util.regex.Pattern.compile(search, java.util.regex.Pattern.CASE_INSENSITIVE);
+                filterList.add(Filters.or(
+                    Filters.regex("studentName_PlacementAppilcation_Text", regex),
+                    Filters.regex("appilcationId_PlacementAppilcation_Text", regex),
+                    Filters.regex("companyName_PlacementAppilcation_Text", regex)
+                ));
+            }
         }
         return filterList.isEmpty() ? new Document() : Filters.and(filterList);
     }

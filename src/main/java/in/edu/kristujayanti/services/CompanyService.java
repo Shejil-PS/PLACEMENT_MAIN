@@ -27,9 +27,21 @@ public class CompanyService extends MongoDataAccess {
     }
 
 
-    public List<Document> getAllCompanies(){
+    public List<Document> getAllCompanies() {
+        return getAllCompanies(null);
+    }
 
-        List<Document> allCompaniesList = findDocuments(mongoDatabase, "companies").into(new ArrayList<>());
+    public List<Document> getAllCompanies(String search){
+        org.bson.conversions.Bson filter = new Document();
+        if (search != null && !search.trim().isEmpty()) {
+            java.util.regex.Pattern regex = java.util.regex.Pattern.compile(search, java.util.regex.Pattern.CASE_INSENSITIVE);
+            filter = com.mongodb.client.model.Filters.or(
+                com.mongodb.client.model.Filters.regex("companyName_PlacementCompany_Text", regex),
+                com.mongodb.client.model.Filters.regex("industry_PlacementCompany_Text", regex)
+            );
+        }
+
+        List<Document> allCompaniesList = findDocumentsWithFilter(mongoDatabase, "companies", filter).into(new ArrayList<>());
 
         for(Document companyDoc : allCompaniesList){
             ResponseUtil.processResponseDocumentWithoutZone(companyDoc);

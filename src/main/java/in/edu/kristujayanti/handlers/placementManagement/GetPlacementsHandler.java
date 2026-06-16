@@ -29,7 +29,8 @@ public class GetPlacementsHandler implements Handler<RoutingContext> {
         HttpServerResponse response = routingContext.response();
 
         try {
-            List<Document> placementsList = placementService.getAllPlacements();
+            String search = routingContext.request().getParam("search");
+            List<Document> placementsList = placementService.getAllPlacements(search);
             JsonArray dataArray = new JsonArray();
             for (Document doc : placementsList) {
                 dataArray.add(new JsonObject(doc.toJson()));

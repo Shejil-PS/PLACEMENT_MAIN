@@ -46,7 +46,20 @@ public class PlacementService extends MongoDataAccess {
     // ── Placement CRUD ─────────────────────────────────────────────────────────
 
     public List<Document> getAllPlacements() {
-        List<Document> list = findDocuments(mongoDatabase, COLLECTION).into(new ArrayList<>());
+        return getAllPlacements(null);
+    }
+
+    public List<Document> getAllPlacements(String search) {
+        org.bson.conversions.Bson filter = new Document();
+        if (search != null && !search.trim().isEmpty()) {
+            java.util.regex.Pattern regex = java.util.regex.Pattern.compile(search, java.util.regex.Pattern.CASE_INSENSITIVE);
+            filter = Filters.or(
+                Filters.regex("companyName_PlacementDrive_Text", regex),
+                Filters.regex("jobs_PlacementDrive_DocumentArray.role_PlacementDrive_Text", regex),
+                Filters.regex("placementCode_PlacementDrive_Text", regex)
+            );
+        }
+        List<Document> list = findDocumentsWithFilter(mongoDatabase, COLLECTION, filter).into(new ArrayList<>());
         for (Document doc : list) {
             Object originalId = doc.get("_id");
             if (originalId instanceof String) {

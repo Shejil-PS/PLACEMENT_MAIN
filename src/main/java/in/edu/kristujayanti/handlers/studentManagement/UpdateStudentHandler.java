@@ -37,7 +37,8 @@ public class UpdateStudentHandler implements Handler<RoutingContext> {
                         ResponseType.SUCCESS,
                         StatusCode.BAD_REQUEST,
                         new JsonObject(),
-                        new JsonArray().add("Request body is required and cannot be empty"));
+                        new JsonArray().add("Request body is r" +
+                                "equired and cannot be empty"));
                 return;
             }
 

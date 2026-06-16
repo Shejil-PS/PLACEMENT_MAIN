@@ -23,7 +23,65 @@ public class StudentService extends MongoDataAccess {
     }
 
     public List<Document> getAllStudents() {
-        List<Document> studentsList = findDocuments(mongoDatabase, COLLECTION).into(new ArrayList<>());
+        return getAllStudents(null);
+    }
+
+    public List<Document> getAllStudents(String search) {
+        org.bson.conversions.Bson filter = new Document();
+        if (search != null && !search.trim().isEmpty()) {
+            java.util.regex.Pattern regex = java.util.regex.Pattern.compile(search, java.util.regex.Pattern.CASE_INSENSITIVE);
+            List<org.bson.conversions.Bson> orConditions = new ArrayList<>();
+            orConditions.add(com.mongodb.client.model.Filters.regex("firstName_PlacementStudent_Text", regex));
+            orConditions.add(com.mongodb.client.model.Filters.regex("lastName_PlacementStudent_Text", regex));
+            orConditions.add(com.mongodb.client.model.Filters.regex("rollNo_PlacementStudent_Text", regex));
+            orConditions.add(com.mongodb.client.model.Filters.regex("departmentName_PlacementStudent_Text", regex));
+            orConditions.add(com.mongodb.client.model.Filters.regex("specialization_PlacementStudent_Text", regex));
+            orConditions.add(com.mongodb.client.model.Filters.regex("course", regex));
+            
+            String s = search.toLowerCase().trim();
+            if (s.contains("opted in")) {
+                orConditions.add(com.mongodb.client.model.Filters.eq("optedIn_PlacementStudent_Bool", true));
+                orConditions.add(com.mongodb.client.model.Filters.eq("optInStatus", "opted_in"));
+                orConditions.add(com.mongodb.client.model.Filters.eq("optedIn", true));
+            } else if (s.contains("pending")) {
+                orConditions.add(com.mongodb.client.model.Filters.and(
+                    com.mongodb.client.model.Filters.ne("optedIn_PlacementStudent_Bool", true),
+                    com.mongodb.client.model.Filters.ne("optedIn_PlacementStudent_Bool", false)
+                ));
+                orConditions.add(com.mongodb.client.model.Filters.eq("optInStatus", "pending"));
+            } else if (s.contains("opted out")) {
+                orConditions.add(com.mongodb.client.model.Filters.eq("optedIn_PlacementStudent_Bool", false));
+                orConditions.add(com.mongodb.client.model.Filters.eq("optedIn", false));
+                orConditions.add(com.mongodb.client.model.Filters.eq("optInStatus", "opted_out"));
+            }
+
+            if (s.contains("frozen")) {
+                orConditions.add(com.mongodb.client.model.Filters.eq("freeze_PlacementStudent_Bool", true));
+            } else if (s.contains("active")) {
+                orConditions.add(com.mongodb.client.model.Filters.ne("freeze_PlacementStudent_Bool", true));
+            }
+
+            if (s.equals("placed")) {
+                orConditions.add(com.mongodb.client.model.Filters.eq("isPlaced_PlacementStudent_Bool", true));
+                orConditions.add(com.mongodb.client.model.Filters.eq("isPlaced", true));
+                orConditions.add(com.mongodb.client.model.Filters.eq("placedStatus_PlacementStudent_Bool", true));
+            } else if (s.equals("unplaced")) {
+                orConditions.add(com.mongodb.client.model.Filters.ne("isPlaced_PlacementStudent_Bool", true));
+                orConditions.add(com.mongodb.client.model.Filters.ne("isPlaced", true));
+                orConditions.add(com.mongodb.client.model.Filters.ne("placedStatus_PlacementStudent_Bool", true));
+            }
+
+            try {
+                double val = Double.parseDouble(search);
+                orConditions.add(com.mongodb.client.model.Filters.eq("cgpa_PlacementStudent_Double", val));
+                orConditions.add(com.mongodb.client.model.Filters.eq("cgpa", val));
+            } catch (NumberFormatException e) {
+                // Not a number, ignore
+            }
+
+            filter = com.mongodb.client.model.Filters.or(orConditions);
+        }
+        List<Document> studentsList = findDocumentsWithFilter(mongoDatabase, COLLECTION, filter).into(new ArrayList<>());
         for (Document doc : studentsList) {
             Object originalId = doc.get("_id");
             if (originalId instanceof String) {

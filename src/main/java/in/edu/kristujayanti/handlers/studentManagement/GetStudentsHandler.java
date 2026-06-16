@@ -29,8 +29,9 @@ public class GetStudentsHandler implements Handler<RoutingContext> {
         HttpServerResponse response = routingContext.response();
 
         try {
-            LOGGER.info("Handling request for Listing Students");
-            List<Document> studentsList = studentService.getAllStudents();
+            String search = routingContext.request().getParam("search");
+            LOGGER.info("Handling request for Listing Students with search: {}", search);
+            List<Document> studentsList = studentService.getAllStudents(search);
             if (!studentsList.isEmpty()) {
                 ResponseUtil.createResponse(
                         response,

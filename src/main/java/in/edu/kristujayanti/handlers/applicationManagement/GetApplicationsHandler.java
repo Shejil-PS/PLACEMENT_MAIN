@@ -35,6 +35,7 @@ public class GetApplicationsHandler implements Handler<RoutingContext> {
             extractParam(routingContext, filters, "companyId");
             extractParam(routingContext, filters, "studentId");
             extractParam(routingContext, filters, "status");
+            extractParam(routingContext, filters, "search");
 
             LOGGER.info("Handling request to list applications with filters: {}", filters.encode());
 

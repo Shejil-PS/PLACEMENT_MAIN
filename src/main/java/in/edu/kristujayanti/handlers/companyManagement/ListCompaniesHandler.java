@@ -38,7 +38,8 @@ public class ListCompaniesHandler implements Handler<RoutingContext> {
 
         try {
             LOGGER.info("Handling request for Listing Companies");
-            List<Document> companiesList = companyService.getAllCompanies();
+            String search = routingContext.request().getParam("search");
+            List<Document> companiesList = companyService.getAllCompanies(search);
             if(!companiesList.isEmpty()){
                 ResponseUtil.createResponse(
                         response,
