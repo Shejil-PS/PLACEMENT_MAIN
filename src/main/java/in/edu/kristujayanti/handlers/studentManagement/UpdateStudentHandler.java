@@ -61,7 +61,7 @@ public class UpdateStudentHandler implements Handler<RoutingContext> {
                         response,
                         ResponseType.SUCCESS,
                         StatusCode.TWOHUNDRED,
-                        JsonObject.mapFrom(updatedStudent),
+                        new JsonObject(updatedStudent),
                         new JsonArray().add("Student updated successfully"));
             } else {
                 ResponseUtil.createResponse(

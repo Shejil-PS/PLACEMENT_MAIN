@@ -31,6 +31,8 @@ import in.edu.kristujayanti.services.BatchService;
 import in.edu.kristujayanti.services.ApplicationService;
 import in.edu.kristujayanti.services.PlacementService;
 import in.edu.kristujayanti.handlers.placementManagement.*;
+import in.edu.kristujayanti.services.DeclarationService;
+import in.edu.kristujayanti.handlers.declarationManagement.*;
 import in.edu.kristujayanti.services.DashboardService;
 import in.edu.kristujayanti.handlers.dashboard.*;
 import in.edu.kristujayanti.services.HealthService;
@@ -177,6 +179,14 @@ public class MicroserviceRouter extends RouterBase {
                 addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_DASHBOARD_SUMMARY, new GetSummaryHandler(dashboardService));
                 addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_DASHBOARD_PLACEMENT_STATS, new GetPlacementStatsHandler(dashboardService));
                 addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_DASHBOARD_RECENT_ACTIVITY, new GetRecentActivityHandler(dashboardService));
+
+                // Declaration Management
+                DeclarationService declarationService = new DeclarationService(mongoDatabase, mongoClient);
+                addRoute(HttpMethod.POST, MicroserviceRoutingURLNames.CREATE_DECLARATION, new CreateDeclarationHandler(declarationService));
+                addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.LIST_DECLARATIONS, new ListDeclarationsHandler(declarationService));
+                addRoute(HttpMethod.GET, MicroserviceRoutingURLNames.GET_DECLARATION_BY_ID, new GetDeclarationByIdHandler(declarationService));
+                addRoute(HttpMethod.PUT, MicroserviceRoutingURLNames.UPDATE_DECLARATION, new UpdateDeclarationHandler(declarationService));
+                addRoute(HttpMethod.DELETE, MicroserviceRoutingURLNames.DELETE_DECLARATION, new DeleteDeclarationHandler(declarationService));
 
         }
 

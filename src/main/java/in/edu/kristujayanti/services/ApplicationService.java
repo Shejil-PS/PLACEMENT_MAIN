@@ -27,7 +27,7 @@ public class ApplicationService extends MongoDataAccess {
 
     private static final List<String> VALID_STATUSES = List.of(
             "Applied", "Shortlisted", "Interview Scheduled",
-            "Interview Completed", "Selected", "Rejected", "On Hold"
+            "Interview Completed", "Selected", "Rejected", "On Hold", "In Progress"
     );
 
     public ApplicationService(MongoDatabase mongoDatabase, MongoClient mongoClient, Redis redisClient) {
@@ -38,11 +38,24 @@ public class ApplicationService extends MongoDataAccess {
 
     public JsonObject applyForJob(Document paramsDoc) {
         String studentId = paramsDoc.getString("studentId");
+        if (studentId == null || studentId.trim().isEmpty()) {
+            studentId = paramsDoc.getString("studentId_PlacementAppilcation_Text");
+        }
+        
         String jobId = paramsDoc.getString("jobId");
+        if (jobId == null || jobId.trim().isEmpty()) {
+            jobId = paramsDoc.getString("jobId_PlacementAppilcation_Text");
+        }
 
         Bson duplicateFilter = Filters.and(
-                Filters.eq("studentId", studentId),
-                Filters.eq("jobId", jobId)
+                Filters.or(
+                    Filters.eq("studentId", studentId),
+                    Filters.eq("studentId_PlacementAppilcation_Text", studentId)
+                ),
+                Filters.or(
+                    Filters.eq("jobId", jobId),
+                    Filters.eq("jobId_PlacementAppilcation_Text", jobId)
+                )
         );
 
         Document existing = findSingleDocument(mongoDatabase, COLLECTION, duplicateFilter);

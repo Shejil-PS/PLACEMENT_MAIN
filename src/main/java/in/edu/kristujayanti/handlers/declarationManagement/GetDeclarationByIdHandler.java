@@ -1,8 +1,8 @@
-package in.edu.kristujayanti.handlers.studentManagement;
+package in.edu.kristujayanti.handlers.declarationManagement;
 
 import in.edu.kristujayanti.enums.ResponseType;
 import in.edu.kristujayanti.enums.StatusCode;
-import in.edu.kristujayanti.services.StudentService;
+import in.edu.kristujayanti.services.DeclarationService;
 import in.edu.kristujayanti.util.ResponseUtil;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
@@ -13,13 +13,13 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetStudentByIdHandler implements Handler<RoutingContext> {
+public class GetDeclarationByIdHandler implements Handler<RoutingContext> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetStudentByIdHandler.class);
-    private final StudentService studentService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GetDeclarationByIdHandler.class);
+    private final DeclarationService declarationService;
 
-    public GetStudentByIdHandler(StudentService studentService) {
-        this.studentService = studentService;
+    public GetDeclarationByIdHandler(DeclarationService declarationService) {
+        this.declarationService = declarationService;
     }
 
     @Override
@@ -28,34 +28,27 @@ public class GetStudentByIdHandler implements Handler<RoutingContext> {
 
         try {
             String id = routingContext.pathParam("id");
-            LOGGER.info("Handling request to get Student by ID: {}", id);
 
-            Document student = studentService.getStudentById(id);
-            if (student != null) {
-                Object originalId = student.get("_id");
-                if (originalId instanceof String) {
-                    student.remove("_id");
-                }
-                ResponseUtil.processResponseDocumentWithoutZone(student);
-                if (originalId instanceof String) {
-                    student.put("_id", originalId);
-                }
+            Document doc = declarationService.getDeclarationById(id);
+            if (doc != null) {
+                ResponseUtil.processResponseDocumentWithoutZone(doc);
                 ResponseUtil.createResponse(
                         response,
                         ResponseType.SUCCESS,
                         StatusCode.TWOHUNDRED,
-                        new JsonObject(student),
-                        new JsonArray());
+                        new JsonObject(doc.toJson()),
+                        new JsonArray().add("Declaration details fetched successfully"));
             } else {
                 ResponseUtil.createResponse(
                         response,
                         ResponseType.SUCCESS,
                         StatusCode.FILE_NOT_FOUND,
                         new JsonObject(),
-                        new JsonArray().add("Student not found"));
+                        new JsonArray().add("Declaration not found"));
             }
+
         } catch (Exception e) {
-            LOGGER.error("Error in Get Student By ID Handler", e);
+            LOGGER.error("Error in Get Declaration By Id Handler", e);
             ResponseUtil.createResponse(
                     response,
                     ResponseType.ERROR,

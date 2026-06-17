@@ -61,7 +61,7 @@ public class UpdateCompanyHandler implements Handler<RoutingContext> {
                         response,
                         ResponseType.SUCCESS,
                         StatusCode.TWOHUNDRED,
-                        JsonObject.mapFrom(updatedCompany),
+                        new JsonObject(updatedCompany),
                         new JsonArray().add("Company updated successfully"));
             } else {
                 ResponseUtil.createResponse(

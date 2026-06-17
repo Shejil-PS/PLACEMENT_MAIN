@@ -44,7 +44,7 @@ public class GetCompanyByIdHandler implements Handler<RoutingContext> {
                         response,
                         ResponseType.SUCCESS,
                         StatusCode.TWOHUNDRED,
-                        JsonObject.mapFrom(company),
+                        new JsonObject(company),
                         new JsonArray());
             } else {
                 ResponseUtil.createResponse(

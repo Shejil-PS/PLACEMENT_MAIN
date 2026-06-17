@@ -54,4 +54,10 @@ String GET_DASHBOARD_SUMMARY = "/dashboard/summary";
 String GET_DASHBOARD_PLACEMENT_STATS = "/dashboard/placement-stats";
 String GET_DASHBOARD_RECENT_ACTIVITY = "/dashboard/recent-applications";
 
+String CREATE_DECLARATION = "/create-declaration";
+String LIST_DECLARATIONS = "/list-declarations";
+String GET_DECLARATION_BY_ID = "/get-declaration/:id";
+String UPDATE_DECLARATION = "/update-declaration/:id";
+String DELETE_DECLARATION = "/delete-declaration/:id";
+
 }
